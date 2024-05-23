@@ -2,13 +2,12 @@ version: '3.9'
 
 services:
   postgresdb:
-    restart: always
     image: postgres:14-alpine
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./create_tables.sql:/docker-entrypoint-initdb.d/2-create_tables.sql
+      - typer_postgres_data:/var/lib/postgresql/data
+      - ./create_tables/:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_DB: mydatabase
       POSTGRES_USER: userAdmin
@@ -54,4 +53,4 @@ services:
     depends_on:
       - pythonback
 volumes:
-  postgres_data:
+  typer_postgres_data:
