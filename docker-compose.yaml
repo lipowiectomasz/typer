@@ -2,15 +2,30 @@ version: '3.9'
 
 services:
   postgresdb:
+    restart: always
     image: postgres:14-alpine
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./create_tables.sql:/docker-entrypoint-initdb.d/2-create_tables.sql
     environment:
       POSTGRES_DB: mydatabase
       POSTGRES_USER: userAdmin
       POSTGRES_PASSWORD: mypassword
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
   pythonback:
     image: python:3
     container_name: pythonback
@@ -30,13 +45,13 @@ services:
     build:
       context: .
       dockerfile: ./.docker/dockerfiles/python.dockerfile
-    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "pip install -r ./pythonback/requirements.txt && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     working_dir: /usr/src/app
     volumes:
       - .:/usr/src/app
     ports:
       - "8000:8000"
     depends_on:
-      - postgresdb 
+      - pythonback
 volumes:
   postgres_data:
