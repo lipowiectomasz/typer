@@ -1,10 +1,31 @@
 version: '3.9'
 
 services:
-  db:
-    image: postgres
-    env_file:
-      - .env
+  postgresdb:
+    image: postgres:14-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: userAdmin
+      POSTGRES_PASSWORD: mypassword
+  pythonback:
+    image: python:3
+    container_name: pythonback
+    volumes:
+      - ./pythonback:/pythonback
+    working_dir: /pythonback
+    command: bash -c "pip install -r requirements.txt && python -u pythonback.py"
+    depends_on:
+      - postgresdb
+    environment:
+      DATABASE_HOST: postgresdb
+      DATABASE_PORT: 5432
+      DATABASE_USER: userAdmin
+      DATABASE_PASSWORD: mypassword
+      DATABASE_NAME: mydatabase
   web:
     build:
       context: .
@@ -16,6 +37,6 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
-    env_file:
-      - .env
+      - postgresdb 
+volumes:
+  postgres_data:
