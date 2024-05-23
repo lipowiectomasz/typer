@@ -1,0 +1,8 @@
+.idea
+.env
+db.sqlite3
+
+typer/__pycache__
+typer/*.log
+typer/*.pot
+typer/*.pyc
